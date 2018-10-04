@@ -83,4 +83,5 @@ class Application {
 let app;
 document.addEventListener("DOMContentLoaded", () => {
   app = new Application();
+  console.log(app);
 });
