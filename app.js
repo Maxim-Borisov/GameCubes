@@ -44,7 +44,7 @@ class Application {
     ev.stopPropagation();
   }
 
-  eventLoop(resolution = 800 /* ms */) {
+  eventLoop(resolution = 200 /* ms */) {
     this.scene.loop(resolution);
     requestAnimationFrame(this.eventLoop.bind(this, resolution));
   }
@@ -82,5 +82,5 @@ class Application {
 
 let app;
 document.addEventListener("DOMContentLoaded", () => {
-  app = new Application()
+  app = new Application();
 });

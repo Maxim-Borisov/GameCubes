@@ -1,15 +1,21 @@
-const GRID_SIZE = 10;
+const GRID_SIZE = 15;
 
 function _randInt(max = 20, min = 0) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
+//Generate random value between 5 and 25 (inclusive)
+function _randomInteger(min = 5, max = 20){
+  let value = Math.floor(Math.random() * (max - min + 1)) + min;
+  return value;
+}
 
 class Scene {
 
   constructor() {
     this._now = Date.now();
     this._counter = 0;
+    this._frequency = 0; //The frequency of appearance of new cubes on the scene
 
     this._items   = [];
     this._lastPos = null;
@@ -79,6 +85,8 @@ class Scene {
     if (!this.pause && !this._counter) {
       this.addRandomItem();
     }
+
+    this._frequency = _randomInteger(); //The second cube will appear after _frequency scene updates
   }
 
   loop(timeout) {
@@ -90,9 +98,11 @@ class Scene {
 
       this._now = Date.now();
 
-      if(this._counter === 5) {
-        this.addRandomItem();
-        this._counter = 0;
+      if(this._counter === this._frequency) { //After _frequency scene updates
+        this.addRandomItem(); //Add new cube
+        this._counter = 0; //Clear the counter
+        this._frequency = _randomInteger(); //Determine when the next cube will appear
+        //console.log("Next cube will appear after: " + this._frequency + " updates");
       }
 
       this._counter++;
