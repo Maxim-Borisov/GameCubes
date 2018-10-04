@@ -14,6 +14,20 @@ function qPlainCoord({ x, y, z}) {
   return ({x: x / z, y: y / z});
 }
 
+//Generate random value between 0.5 and 2 (exclusive) or 0 and 1 (exclusive) depending of
+//what property (speed or color) we need to randomize
+function _randomize(type, min = 0.5, max = 2){
+  let value = 0;
+  if(type === "speed"){
+    value = Math.random() * (max - min) + min;
+  }
+  if(type === "color"){
+    value = Math.random();
+  }
+  value = parseFloat(value.toFixed(1)); //Round to 1 symbol after the point end explicitly convert to a number datatype
+  return value;
+}
+
 class Cube {
 
   constructor(scene, id, size, anchor) {
