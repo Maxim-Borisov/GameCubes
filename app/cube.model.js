@@ -40,6 +40,9 @@ class Cube {
     this._size   = size   || 1.0;
     this._anchor = anchor || {x: 0.5, y: -0.5, z: 0};
 
+    this._speed = _randomize("speed"); //The distance that cube can overcome in one scene update
+                                       //Value between 0.5 and 2 (i.e. from half to twice of a normal speed of the cube)
+
     this._destructed = false;
 
     this.whiteColor = [ 1.0,  1.0,  1.0,  1.0 ];
