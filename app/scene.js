@@ -15,8 +15,8 @@ class Scene {
   constructor() {
     this._now = Date.now();
     this._counter = 0;
-    this._frequency = 0; //The frequency of appearance of new cubes on the scene
-
+    this._frequency = _randomInteger(); //The frequency of appearance of new cubes on the scene
+                                        //The second cube will appear after _frequency scene updates
     this._items   = [];
     this._lastPos = null;
 
@@ -85,8 +85,6 @@ class Scene {
     if (!this.pause && !this._counter) {
       this.addRandomItem();
     }
-
-    this._frequency = _randomInteger(); //The second cube will appear after _frequency scene updates
   }
 
   loop(timeout) {
