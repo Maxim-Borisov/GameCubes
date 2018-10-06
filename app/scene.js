@@ -24,6 +24,7 @@ class Scene {
     this.camera = new Camera();
 
     this.pause = true;
+    this._colorIdBuffer; //
   }
 
   initGL(canvas, fov = 60, scale = GRID_SIZE) {
@@ -89,7 +90,7 @@ class Scene {
 
   loop(timeout) {
 
-    this.drawScene();
+    this.drawScene(); //
 
     if (!this.pause && (Date.now() - this._now) > timeout) {
       this.animate();
@@ -263,14 +264,24 @@ class Scene {
 
 //=================================== DRAWING ===================================
 
-  drawScene(){
-    this.render();
+  createFrameBuffer(id){
+    let id = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, id);
+
+    this.createTexBuffer();
+
+    this.createRenderBuffer();
+
+    this.finalize();
+
+    this._colorIdBuffer = id;
   }
 
-  render() {
+  drawScene(){
     let gl = this.gl;    // OpenGL context
     let pl = this.prog;  // Shader pipeline program
 
+    //Initialization section
     gl.useProgram(pl);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -282,12 +293,20 @@ class Scene {
 
     this.setUniformVec3fv('u_LightPos', this.light);
 
+    this.createFrameBuffer(colorIdBuffer);
+
+
+
     this.camera.render(this);
+
+
+
 
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.CULL_FACE);
 
     gl.flush();
+
   }
 
   drawElements(count, mode, type) {
