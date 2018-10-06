@@ -261,6 +261,19 @@ class Scene {
   console.log("Coordinate X: " + x + " | Coordinate Y: " + y);
   }
 
+  //
+  getPixelColor(){
+    let gl = this.gl;
+    let pixelColor = new Uint8Array(4); //1 px * 1 px * 4 byte
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer); //
+    gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixelColor); //
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null); //
+
+    console.log("Pixel color: " + pixelColor);
+    return pixelColor;
+  }
+
   mousePress(ev) {
 
   }
