@@ -1,3 +1,5 @@
+var colorIdList = {}; //
+
 function qNormalizeAngle(angle, norm = 720)
 {
 
@@ -33,6 +35,7 @@ class Cube {
   constructor(scene, id, size, anchor) {
     this._m = Matrix.I(4);
     this._id = id;
+    this._colorId = this.colorIdGenerator(); //
 
     this._rot = {x: 0, y: 0, z: 0};
     this._pos = {x: 0, y: 0, z: 0};
@@ -101,6 +104,19 @@ class Cube {
 
     scene.addItem(this);
     this.scene = scene;
+  }
+
+  //
+  colorIdGenerator(){
+    let color = [Math.random(), Math.random(),Math.random(), 1.0]; //
+    let key = tempColor[0] + ':' + tempColor[1] + ':' + tempColor[2]; //
+
+    if (key in colorIdList){ //
+      return colorIdGenerator(); //
+    } else {
+      colorIdList[key] = true; //
+      return color; //
+    }
   }
 
   //Generate the array that describes the color of all vertices of the cube
