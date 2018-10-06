@@ -264,9 +264,21 @@ class Scene {
 
 //=================================== DRAWING ===================================
 
-  createFrameBuffer(id){
-    let id = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, id);
+  createTexBuffer(){
+
+  }
+
+  createRenderBuffer(){
+
+  }
+
+  finalize(){
+
+  }
+
+  createFrameBuffer(gl){
+    let framebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
 
     this.createTexBuffer();
 
@@ -274,7 +286,7 @@ class Scene {
 
     this.finalize();
 
-    this._colorIdBuffer = id;
+    return framebuffer;
   }
 
   drawScene(){
@@ -291,16 +303,12 @@ class Scene {
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    //
+    this._colorIdBuffer = this.createFrameBuffer(gl); //
+
     this.setUniformVec3fv('u_LightPos', this.light);
 
-    this.createFrameBuffer(colorIdBuffer);
-
-
-
-    this.camera.render(this);
-
-
-
+    this.camera.render(this); //
 
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.CULL_FACE);
