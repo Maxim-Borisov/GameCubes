@@ -279,8 +279,13 @@ class Scene {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureBuffer, 0); //
   }
 
-  createRenderBuffer(){
- }
+  createRenderBuffer(gl, width, height){
+   let depthBuffer = gl.createRenderbuffer(); //
+
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer); //
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height); //
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer); //
+   }
 
   finalize(){
 
@@ -296,7 +301,7 @@ class Scene {
 
     this.createTexBuffer(gl, width, height);
 
-    this.createRenderBuffer();
+    this.createRenderBuffer(gl, width, height);
 
     this.finalize();
 
