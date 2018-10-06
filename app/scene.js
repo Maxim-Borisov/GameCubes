@@ -259,15 +259,16 @@ class Scene {
   y = this._canvas.offsetHeight - (ev.clientY - topIndent);
 
   console.log("Coordinate X: " + x + " | Coordinate Y: " + y);
+  return {x: x, y: y};
   }
 
   //
-  getPixelColor(){
+  getPixelColor(coordinates){
     let gl = this.gl;
     let pixelColor = new Uint8Array(4); //1 px * 1 px * 4 byte
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this._framebuffer); //
-    gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixelColor); //
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this._colorIdBuffer); //
+    gl.readPixels(coordinates.x, coordinates.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixelColor); //
     gl.bindFramebuffer(gl.FRAMEBUFFER, null); //
 
     console.log("Pixel color: " + pixelColor);
@@ -277,25 +278,35 @@ class Scene {
   //
   compareColors(pixelColor, colorId){
     return (
-      Math.abs(Math.round(color[0]*255) - readout[0]) <= 1 && //
-      Math.abs(Math.round(color[1]*255) - readout[1]) <= 1 &&
-      Math.abs(Math.round(color[2]*255) - readout[2]) <= 1
+      Math.abs(Math.round(colorId[0]*255) - pixelColor[0]) <= 1 && //
+      Math.abs(Math.round(colorId[1]*255) - pixelColor[1]) <= 1 &&
+      Math.abs(Math.round(colorId[2]*255) - pixelColor[2]) <= 1
     );
   }
 
   //
-  findCube(){
-    this._tems.forEach(el => { //
+  findCube(pixelColor){
+    let cubeId;
+
+    this._items.forEach(el => { //
       let picked = false;
       picked = this.compareColors(pixelColor, el._colorId); //
       if (picked){ //
-        return el._id; //
+        cubeId = el._id; //
       }
     });
+    
+    return cubeId;
   }
 
   mousePress(ev) {
+    let coordinates = this.findCoordinates(ev);
 
+    let pixelColor = this.getPixelColor(coordinates);
+
+    let cubeId = this.findCube(pixelColor);
+
+    console.log("Cube ID:  " + cubeId);
   }
 
   mouseMove(ev) {
