@@ -274,6 +274,15 @@ class Scene {
     return pixelColor;
   }
 
+  //
+  compareColors(pixelColor, colorId){
+    return (
+      Math.abs(Math.round(color[0]*255) - readout[0]) <= 1 && //
+      Math.abs(Math.round(color[1]*255) - readout[1]) <= 1 &&
+      Math.abs(Math.round(color[2]*255) - readout[2]) <= 1
+    );
+  }
+
   mousePress(ev) {
 
   }
