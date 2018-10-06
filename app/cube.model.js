@@ -109,7 +109,7 @@ class Cube {
   //
   colorIdGenerator(){
     let color = [Math.random(), Math.random(),Math.random(), 1.0]; //
-    let key = tempColor[0] + ':' + tempColor[1] + ':' + tempColor[2]; //
+    let key = color[0] + ':' + color[1] + ':' + color[2]; //
 
     if (key in colorIdList){ //
       return colorIdGenerator(); //

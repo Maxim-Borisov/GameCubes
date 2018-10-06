@@ -89,7 +89,7 @@ class Scene {
 
   loop(timeout) {
 
-    this.render();
+    this.drawScene();
 
     if (!this.pause && (Date.now() - this._now) > timeout) {
       this.animate();
@@ -130,19 +130,6 @@ class Scene {
     return v;
   }
 
-  // TODO: use above grid to debug scene
-  debugScene() {
-    for (let i = 0; i <= GRID_SIZE; i++) {
-      for (let j = 0; j <= GRID_SIZE; j++) {
-        if ((i + j) % 2) {
-          new Cube(this, '' + j + '-' + i).move(this.point(i, j, 3));
-        }
-      }
-    }
-
-    this._sortItems();
-  }
-
   addRandomItem() {
     let pt = {x: _randInt(GRID_SIZE), y: 0, z: _randInt(3)};
     let rt = {x: 90 * _randInt(4), y: 90 * _randInt(4)};
@@ -154,6 +141,12 @@ class Scene {
     if (item && item.addToScene) {
       this._items.push(item);
     }
+  }
+
+  _sortItems() {
+    this._items.sort((a, b) => {
+      return (a.pos.z - b.pos.z);
+    });
   }
 
   removeItem(idx) {
@@ -225,17 +218,6 @@ class Scene {
     gl.deleteBuffer(buffer);
   }
 
-  drawElements(count, mode, type) {
-    let gl = this.gl;
-    gl.drawElements(mode || gl.TRIANGLES, count, type || gl.UNSIGNED_SHORT, 0);
-  }
-
-  _sortItems() {
-    this._items.sort((a, b) => {
-      return (a.pos.z - b.pos.z);
-    });
-  }
-
   // TODO: map to absolute 2d coordinate
   // below is example mapping
   _mapMousePosition(x, y) {
@@ -262,21 +244,27 @@ class Scene {
 
   }
 
-  animate() {
-    let pt = this.point(0, GRID_SIZE, 0);
-    this._items.forEach(el => {
-      //console.log("The speed of cube id " + el._id + " is " + el._speed);
-      //console.log("The position of cube id " + el._id + " is " + el.pos.y);
-      // TODO: add check for collision with existing cubes
-      //if (el.pos.y < pt.y) el.move(0, 1, 0);
-      if((el.pos.y + el._speed) > pt.y){ //If cube on the next iteration given its current speed will stop below the floor
-        el.move(0, (pt.y - el.pos.y), 0); //Reduce its speed to the value that will allow it to stop at floor level
-      }
+  itemSelected(item, idx) {
 
-      if (el.pos.y < pt.y){ //If cube not near the floor
-        el.move(0, el._speed, 0); //Just move it considering its speed
+  }
+
+  // TODO: use above grid to debug scene
+  debugScene() {
+    for (let i = 0; i <= GRID_SIZE; i++) {
+      for (let j = 0; j <= GRID_SIZE; j++) {
+        if ((i + j) % 2) {
+          new Cube(this, '' + j + '-' + i).move(this.point(i, j, 3));
+        }
       }
-    });
+    }
+
+    this._sortItems();
+  }
+
+//=================================== DRAWING ===================================
+
+  drawScene(){
+    this.render();
   }
 
   render() {
@@ -302,12 +290,30 @@ class Scene {
     gl.flush();
   }
 
+  drawElements(count, mode, type) {
+    let gl = this.gl;
+    gl.drawElements(mode || gl.TRIANGLES, count, type || gl.UNSIGNED_SHORT, 0);
+  }
+
+
   renderItems() {
     this._items.forEach(el => el.render(this));
   }
 
-  itemSelected(item, idx) {
+  animate() {
+    let pt = this.point(0, GRID_SIZE, 0);
+    this._items.forEach(el => {
+      //console.log("The speed of cube id " + el._id + " is " + el._speed);
+      //console.log("The position of cube id " + el._id + " is " + el.pos.y);
+      // TODO: add check for collision with existing cubes
+      //if (el.pos.y < pt.y) el.move(0, 1, 0);
+      if((el.pos.y + el._speed) > pt.y){ //If cube on the next iteration given its current speed will stop below the floor
+        el.move(0, (pt.y - el.pos.y), 0); //Reduce its speed to the value that will allow it to stop at floor level
+      }
 
+      if (el.pos.y < pt.y){ //If cube not near the floor
+        el.move(0, el._speed, 0); //Just move it considering its speed
+      }
+    });
   }
-
 }
