@@ -171,6 +171,12 @@ class Scene {
     this.gl.uniform4fv(pUniform, new Float32Array((mat instanceof Matrix) ? mat.flatten() : mat)); //
   }
 
+  //
+  setUniform1i(param, value){
+    let pUniform = this.gl.getUniformLocation(this.prog, param);
+    this.gl.uniform1i(pUniform, value); //
+  }
+
   newElementArray(array) {
     let gl = this.gl;
 
@@ -331,7 +337,17 @@ class Scene {
 
     this.setUniformVec3fv('u_LightPos', this.light);
 
-    this.camera.render(this); //
+    //Off-screen rendering
+    this.setUniform1i("u_OffScreen", true); //
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this._colorIdBuffer);
+    this.camera.render(this);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    this.setUniform1i("u_OffScreen", true);
+
+    //On-screen rendering
+    this.camera.render(this);
 
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.CULL_FACE);
