@@ -283,6 +283,17 @@ class Scene {
     );
   }
 
+  //
+  findCube(){
+    this._tems.forEach(el => { //
+      let picked = false;
+      picked = this.compareColors(pixelColor, el._colorId); //
+      if (picked){ //
+        return el._id; //
+      }
+    });
+  }
+
   mousePress(ev) {
 
   }
