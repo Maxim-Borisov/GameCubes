@@ -235,6 +235,32 @@ class Scene {
     });
   }
 
+//=================================== CONTROLLING ===================================
+
+  //
+  findCoordinates(ev){
+  let x, y;
+  let topIndent = 0;
+  let leftIndent = 0;
+  let object = this._canvas;
+
+  while (object && object.tagName !== "body"){ //
+    topIndent   += object.offsetTop;
+    leftIndent  += object.offsetLeft;
+    object = object.offsetParent; //
+  }
+
+  //
+  leftIndent += window.pageXOffset;
+  topIndent  -= window.pageYOffset;
+
+  //
+  x = ev.clientX - leftIndent;
+  y = this._canvas.offsetHeight - (ev.clientY - topIndent);
+
+  console.log("Coordinate X: " + x + " | Coordinate Y: " + y);
+  }
+
   mousePress(ev) {
 
   }
