@@ -279,6 +279,7 @@ class Scene {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureBuffer, 0); //
   }
 
+  //Create render buffer which will hold depth information
   createRenderBuffer(gl, width, height){
    let depthBuffer = gl.createRenderbuffer(); //
 
@@ -287,8 +288,11 @@ class Scene {
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer); //
    }
 
-  finalize(){
-
+  //Сleaning up
+  finalize(gl){
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
   //
@@ -303,7 +307,7 @@ class Scene {
 
     this.createRenderBuffer(gl, width, height);
 
-    this.finalize();
+    this.finalize(gl);
 
     return framebuffer; //
   }
@@ -322,7 +326,7 @@ class Scene {
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    //
+    //Working section
     this._colorIdBuffer = this.createFrameBuffer(gl); //
 
     this.setUniformVec3fv('u_LightPos', this.light);
