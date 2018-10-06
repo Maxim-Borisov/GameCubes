@@ -242,6 +242,7 @@ class Cube {
     if (this._destructed) return;
 
     scene.setUniformMat4fv('u_MVMatrix', this.m());
+    scene.setUniformVec4fv('u_ColorId', this._colorId); //
 
     this._bind(scene);
     scene.drawElements(this.indices.length);

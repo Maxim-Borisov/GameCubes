@@ -171,6 +171,12 @@ class Scene {
     this.gl.uniform3fv(pUniform, new Float32Array((mat instanceof Matrix) ? mat.flatten() : mat));
   }
 
+  //
+  setUniformVec4fv(param, mat) {
+    let pUniform = this.gl.getUniformLocation(this.prog, param); //
+    this.gl.uniform4fv(pUniform, new Float32Array((mat instanceof Matrix) ? mat.flatten() : mat)); //
+  }
+
   newElementArray(array) {
     let gl = this.gl;
 
