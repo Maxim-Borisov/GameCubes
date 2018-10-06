@@ -263,30 +263,44 @@ class Scene {
   }
 
 //=================================== DRAWING ===================================
+  //Create texture buffer which will hold colorId information
+  createTexBuffer(gl, width, height){
+    let textureBuffer = gl.createTexture(); //
 
-  createTexBuffer(){
+    gl.bindTexture(gl.TEXTURE_2D, textureBuffer); //
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); //
 
+    //Texture settings
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureBuffer, 0); //
   }
 
   createRenderBuffer(){
-
-  }
+ }
 
   finalize(){
 
   }
 
+  //
   createFrameBuffer(gl){
-    let framebuffer = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    let framebuffer = gl.createFramebuffer(); //
+    let width = this._canvas.width;
+    let height = this._canvas.height;
 
-    this.createTexBuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer); //
+
+    this.createTexBuffer(gl, width, height);
 
     this.createRenderBuffer();
 
     this.finalize();
 
-    return framebuffer;
+    return framebuffer; //
   }
 
   drawScene(){
