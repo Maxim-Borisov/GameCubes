@@ -238,7 +238,7 @@ class Scene {
 //=================================== CONTROLLING ===================================
 
   //
-  findCoordinates(ev){
+  getCoordinates(ev){
   let x, y;
   let topIndent = 0;
   let leftIndent = 0;
@@ -284,29 +284,16 @@ class Scene {
     );
   }
 
-  //
-  findCube(pixelColor){
-    let cubeId;
-
-    this._items.forEach(el => { //
-      let picked = false;
-      picked = this.compareColors(pixelColor, el._colorId); //
-      if (picked){ //
-        cubeId = el._id; //
-      }
-    });
-    
-    return cubeId;
-  }
-
   mousePress(ev) {
-    let coordinates = this.findCoordinates(ev);
+    let coordinates = this.getCoordinates(ev);
 
     let pixelColor = this.getPixelColor(coordinates);
 
-    let cubeId = this.findCube(pixelColor);
+    let cubeNumber = this._items.findIndex(el => {
+      return this.compareColors(pixelColor, el._colorId);
+    });
 
-    console.log("Cube ID:  " + cubeId);
+    console.log("Cube Number:  " + cubeNumber);
   }
 
   mouseMove(ev) {
