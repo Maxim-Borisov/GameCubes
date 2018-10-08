@@ -24,7 +24,7 @@ class Scene {
     this.camera = new Camera();
 
     this.pause = true;
-    this._colorIdBuffer; //
+    this._colorIdsBuffer; //Frame buffer used for off-screen rendering
   }
 
   initGL(canvas, fov = 60, scale = GRID_SIZE) {
@@ -90,7 +90,7 @@ class Scene {
 
   loop(timeout) {
 
-    this.drawScene(); //
+    this.drawScene(); //Used instead of old this.render() method
 
     if (!this.pause && (Date.now() - this._now) > timeout) {
       this.animate();
@@ -101,7 +101,6 @@ class Scene {
         this.addRandomItem(); //Add new cube
         this._counter = 0; //Clear the counter
         this._frequency = _randomInteger(); //Determine when the next cube will appear
-        //console.log("Next cube will appear after: " + this._frequency + " updates");
       }
 
       this._counter++;
@@ -138,6 +137,19 @@ class Scene {
     this._sortItems();
   }
 
+  // TODO: use above grid to debug scene
+  debugScene() {
+    for (let i = 0; i <= GRID_SIZE; i++) {
+      for (let j = 0; j <= GRID_SIZE; j++) {
+        if ((i + j) % 2) {
+          new Cube(this, '' + j + '-' + i).move(this.point(i, j, 3));
+        }
+      }
+    }
+
+    this._sortItems();
+  }
+
   addItem(item) {
     if (item && item.addToScene) {
       this._items.push(item);
@@ -165,16 +177,17 @@ class Scene {
     this.gl.uniform3fv(pUniform, new Float32Array((mat instanceof Matrix) ? mat.flatten() : mat));
   }
 
-  //
-  setUniformVec4fv(param, mat) {
-    let pUniform = this.gl.getUniformLocation(this.prog, param); //
-    this.gl.uniform4fv(pUniform, new Float32Array((mat instanceof Matrix) ? mat.flatten() : mat)); //
+  //Set the uniform that consist from vector of 4 float values
+  setUniformVec4fv(name, value) {
+    let pointer = this.gl.getUniformLocation(this.prog, name);
+    this.gl.uniform4fv(pointer, new Float32Array((value instanceof Matrix) ? value.flatten() : value));
   }
 
-  //
-  setUniform1i(param, value){
-    let pUniform = this.gl.getUniformLocation(this.prog, param);
-    this.gl.uniform1i(pUniform, value); //
+  //Set the uniform that consist from one integer value
+  //Used to set bool values to u_OffScreen uniform
+  setUniform1i(name, value){
+    let pointer = this.gl.getUniformLocation(this.prog, name);
+    this.gl.uniform1i(pointer, value);
   }
 
   newElementArray(array) {
@@ -235,50 +248,47 @@ class Scene {
     });
   }
 
-//=================================== CONTROLLING ===================================
-
-  //
+//=================================== CONTROLLING ===================================//
+  //Get coordinates of mouse click relatively to canvas
   getCoordinates(ev){
   let x, y;
   let topIndent = 0;
   let leftIndent = 0;
   let object = this._canvas;
 
-  while (object && object.tagName !== "body"){ //
+  while (object && object.tagName !== "body"){
     topIndent   += object.offsetTop;
     leftIndent  += object.offsetLeft;
-    object = object.offsetParent; //
+    object = object.offsetParent;
   }
 
-  //
+  //Consider the possibility of scrolling on the page
   leftIndent += window.pageXOffset;
   topIndent  -= window.pageYOffset;
 
-  //
+  //Calculate the coordinates
   x = ev.clientX - leftIndent;
   y = this._canvas.offsetHeight - (ev.clientY - topIndent);
 
-  console.log("Coordinate X: " + x + " | Coordinate Y: " + y);
   return {x: x, y: y};
   }
 
-  //
+  //Read the color of the pixel in the place of clicking from frame buffer
   getPixelColor(coordinates){
     let gl = this.gl;
     let pixelColor = new Uint8Array(4); //1 px * 1 px * 4 byte
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this._colorIdBuffer); //
-    gl.readPixels(coordinates.x, coordinates.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixelColor); //
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null); //
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this._colorIdsBuffer);
+    gl.readPixels(coordinates.x, coordinates.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixelColor);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    console.log("Pixel color: " + pixelColor);
     return pixelColor;
   }
 
-  //
+  //Helper function for converting color values to one format and for comparig them
   compareColors(pixelColor, colorId){
     return (
-      Math.abs(Math.round(colorId[0]*255) - pixelColor[0]) <= 1 && //
+      Math.abs(Math.round(colorId[0]*255) - pixelColor[0]) <= 1 &&
       Math.abs(Math.round(colorId[1]*255) - pixelColor[1]) <= 1 &&
       Math.abs(Math.round(colorId[2]*255) - pixelColor[2]) <= 1
     );
@@ -289,7 +299,8 @@ class Scene {
 
     let pixelColor = this.getPixelColor(coordinates);
 
-    let cubeNumber = this._items.findIndex(el => { //
+    let cubeNumber = this._items.findIndex(el => {
+      //findIndex() function returns -1 in case if there is no item in the array that satisfy the condition
       return this.compareColors(pixelColor, el._colorId);
     });
 
@@ -315,26 +326,13 @@ class Scene {
 
   }
 
-  // TODO: use above grid to debug scene
-  debugScene() {
-    for (let i = 0; i <= GRID_SIZE; i++) {
-      for (let j = 0; j <= GRID_SIZE; j++) {
-        if ((i + j) % 2) {
-          new Cube(this, '' + j + '-' + i).move(this.point(i, j, 3));
-        }
-      }
-    }
-
-    this._sortItems();
-  }
-
 //=================================== DRAWING ===================================
-  //Create texture buffer which will hold colorId information
+  //Create texture buffer that will hold color information
   createTexBuffer(gl, width, height){
-    let textureBuffer = gl.createTexture(); //
+    let textureBuffer = gl.createTexture();
 
-    gl.bindTexture(gl.TEXTURE_2D, textureBuffer); //
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); //
+    gl.bindTexture(gl.TEXTURE_2D, textureBuffer);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
     //Texture settings
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -342,16 +340,16 @@ class Scene {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureBuffer, 0); //
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureBuffer, 0);
   }
 
-  //Create render buffer which will hold depth information
+  //Create render buffer that will hold depth information
   createRenderBuffer(gl, width, height){
-   let depthBuffer = gl.createRenderbuffer(); //
+    let depthBuffer = gl.createRenderbuffer();
 
-    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer); //
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height); //
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer); //
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
    }
 
   //Сleaning up
@@ -361,13 +359,13 @@ class Scene {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
-  //
+  //Putting the texture buffer along with the render buffer together and create the frame buffer
   createFrameBuffer(gl){
-    let framebuffer = gl.createFramebuffer(); //
+    let framebuffer = gl.createFramebuffer();
     let width = this._canvas.width;
     let height = this._canvas.height;
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer); //
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
 
     this.createTexBuffer(gl, width, height);
 
@@ -375,7 +373,7 @@ class Scene {
 
     this.finalize(gl);
 
-    return framebuffer; //
+    return framebuffer;
   }
 
   drawScene(){
@@ -393,22 +391,23 @@ class Scene {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     //Working section
-    this._colorIdBuffer = this.createFrameBuffer(gl); //
+    this._colorIdsBuffer = this.createFrameBuffer(gl); //Create frame buffer
 
     this.setUniformVec3fv('u_LightPos', this.light);
 
-    //Off-screen rendering
-    this.setUniform1i("u_OffScreen", true); //
+    //Off-Screen rendering
+    this.setUniform1i("u_OffScreen", true);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this._colorIdBuffer);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this._colorIdsBuffer);
     this.camera.render(this);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    this.setUniform1i("u_OffScreen", true);
+    this.setUniform1i("u_OffScreen", false);
 
-    //On-screen rendering
+    //On-Screen rendering
     this.camera.render(this);
 
+    //Finishing
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.CULL_FACE);
 
@@ -421,7 +420,6 @@ class Scene {
     gl.drawElements(mode || gl.TRIANGLES, count, type || gl.UNSIGNED_SHORT, 0);
   }
 
-
   renderItems() {
     this._items.forEach(el => el.render(this));
   }
@@ -429,11 +427,9 @@ class Scene {
   animate() {
     let pt = this.point(0, GRID_SIZE, 0);
     this._items.forEach(el => {
-      //console.log("The speed of cube id " + el._id + " is " + el._speed);
-      //console.log("The position of cube id " + el._id + " is " + el.pos.y);
       // TODO: add check for collision with existing cubes
-      //if (el.pos.y < pt.y) el.move(0, 1, 0);
-      if((el.pos.y + el._speed) > pt.y){ //If cube on the next iteration given its current speed will stop below the floor
+
+      if((el.pos.y + el._speed) > pt.y){ //If the cube will stop below the floor on the next iteration given its current speed
         el.move(0, (pt.y - el.pos.y), 0); //Reduce its speed to the value that will allow it to stop at floor level
       }
 

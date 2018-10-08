@@ -69,7 +69,7 @@ class Application {
     this.scene.start(enable);
     this.setElementText('btn-start', enable ? 'Stop' : 'Start');
 
-    //Delete the condition if you want to clear the score before the start of the game and after the stop of it
+    //Delete the condition if you want to clear the score before the start of the game and after the stop
     if (disabled) this.setElementText('score', '0');
   }
 
@@ -84,5 +84,4 @@ class Application {
 let app;
 document.addEventListener("DOMContentLoaded", () => {
   app = new Application();
-  console.log(app);
 });

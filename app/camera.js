@@ -45,7 +45,6 @@ class Camera {
   point(x, y, z) {
     let v = __v.apply(this, arguments);
     v = this._proj.mul(v.x, v.y, v.z);
-    // console.log(x, y, z, '=>', v)
     return ({x: v[0], y: v[1], z: v[2] });
   }
 
