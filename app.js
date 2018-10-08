@@ -49,8 +49,8 @@ class Application {
     requestAnimationFrame(this.eventLoop.bind(this, resolution));
   }
 
-  itemSelected(item, idx) {
-    console.log('item found:', item && item._id);
+  itemSelected(items, idx) {
+    console.log('Item found: ' + items[idx]._id);
     this.scene.removeItem(idx);
     this.incrementScore();
   }
@@ -69,6 +69,7 @@ class Application {
     this.scene.start(enable);
     this.setElementText('btn-start', enable ? 'Stop' : 'Start');
 
+    //Delete the condition if you want to clear the score before the start of the game and after the stop of it
     if (disabled) this.setElementText('score', '0');
   }
 

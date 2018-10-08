@@ -294,9 +294,7 @@ class Scene {
     });
 
     if (cubeNumber !== -1){
-      this.removeItem(cubeNumber);
-
-      app.incrementScore();
+      this.itemSelected(this._items, cubeNumber);
     }
     
   }
@@ -313,7 +311,7 @@ class Scene {
 
   }
 
-  itemSelected(item, idx) {
+  itemSelected(items, idx) {
 
   }
 
