@@ -289,11 +289,16 @@ class Scene {
 
     let pixelColor = this.getPixelColor(coordinates);
 
-    let cubeNumber = this._items.findIndex(el => {
+    let cubeNumber = this._items.findIndex(el => { //
       return this.compareColors(pixelColor, el._colorId);
     });
 
-    console.log("Cube Number:  " + cubeNumber);
+    if (cubeNumber !== -1){
+      this.removeItem(cubeNumber);
+
+      app.incrementScore();
+    }
+    
   }
 
   mouseMove(ev) {
